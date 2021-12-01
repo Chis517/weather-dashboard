@@ -1,33 +1,41 @@
+// openweather API Key
 var API_KEY = '5da404477baa8d243c35d8549ebcfaae'
+
+// element selectors from index.html
 var searchBtn = document.getElementById('btn')
 var currentContainer = document.getElementById('current')
 var fiveDayContainer = document.getElementById('forecast')
 var historyContainer = document.getElementById('history')
 
-searchBtn.addEventListener('click', getCity)
+// on user click, getCity function is called
+searchBtn.addEventListener('click', getCity);
 
+// function that sends the user's input to the currentForecast function and saves the search based on the user's input
 function getCity() {
   var currentCity = document.getElementById('city-input').value
   currentForecast(currentCity)
-saveHistory(currentCity)
+saveSearch(currentCity)
 };
 
-function saveHistory(city) {
-  var storage = JSON.parse(localStorage.getItem('weatherHistory'))
+// function that saves the user's input to localStorage
+function saveSearch(city) {
+  var storage = JSON.parse(localStorage.getItem('Search History'))
   if (storage === null) {
     storage = []
   }
   storage.push(city)
-  localStorage.setItem('weatherHistory', JSON.stringify(storage))
-  searchHistory()
+  localStorage.setItem('Search History', JSON.stringify(storage))
+  displaySearch()
 };
 
-function searchHistory() {
-  var currentStorage = JSON.parse(localStorage.getItem('weatherHistory'))
+// function that creates buttons for each saved search from localStorage to the historyContainer
+function displaySearch() {
+  var currentStorage = JSON.parse(localStorage.getItem('Search History'))
   if (currentStorage === null) {
-    historyContainer.textContent = 'No current weather history'
+    historyContainer.textContent = 'No current search history'
   } else {
     historyContainer.textContent = ''
+    // for loop that creates a search button for each search
     for (var i = 0; i < currentStorage.length; i++) {
       var historyBtn = document.createElement('button')
       historyBtn.setAttribute('id', currentStorage[i])
@@ -37,12 +45,13 @@ function searchHistory() {
       historyBtn.addEventListener('click', function(event) {
         currentForecast(event.target.id)
       })
-    }
-  }
-}
+    };
+  };
+};
 
-searchHistory()
+displaySearch()
 
+// function that fetches the open weather API data, returns it in JSON and displays it's data in the currentContainer
 function currentForecast(city) {
   currentContainer.textContent = ''
   fetch('https://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=' + API_KEY + '&units=imperial')
@@ -51,12 +60,14 @@ function currentForecast(city) {
     })
     .then(function (data) {
       console.log('current', data);
-
+      
+      // latitude and longitude data variables for the getFiveDay and getUVI functions
       var lat = data.coord.lat
       var lon = data.coord.lon
       getFiveDay(lat, lon)
       getUVI(lat, lon)
-
+      
+      // variables fetching and displaying the name, temperature, wind speed and humidity of current searched city
       var currentCity = document.createElement('h2')
       currentCity.textContent = data.name
       currentContainer.prepend(currentCity)
@@ -75,6 +86,7 @@ function currentForecast(city) {
     });
 };
 
+// function that fetches the open weather one call API data and displays the 5 day forecast data in the fiveDayContainer
 function getFiveDay(lat, lon) {
   fiveDayContainer.textContent = ''
   fetch('https://api.openweathermap.org/data/2.5/onecall?lat=' + lat + '&lon=' + lon + '&appid=' + API_KEY + '&units=imperial')
@@ -84,10 +96,11 @@ function getFiveDay(lat, lon) {
     .then(function (data) {
       console.log('5 day', data);
 
-      var fiveDayHead = document.createElement('h3')
+      var fiveDayHead = document.createElement('h2')
       fiveDayHead.textContent = "5-Day Forecast:"
       fiveDayContainer.prepend(fiveDayHead)
 
+      // for loop that creates card elements for the five day forecast, displaying each day, date, img based on that day's forecast, temp, wind speed and humidity
       for (var i = 0; i < 5; i++) {
         var card = document.createElement('div')
         fiveDayContainer.append(card)
@@ -119,6 +132,7 @@ function getFiveDay(lat, lon) {
     });
 };
 
+// function that fetches the open weather one call API data to display the UV index in the currentContainer
 function getUVI(lat, lon) {
   fetch('https://api.openweathermap.org/data/2.5/onecall?lat=' + lat + '&lon=' + lon + '&appid=' + API_KEY + '&units=imperial')
     .then(function (response) {
@@ -126,6 +140,7 @@ function getUVI(lat, lon) {
     })
     .then(function (data) {
       var uv = document.createElement('p')
+      uv.setAttribute('id', 'uvIndex')
       uv.textContent = 'UV Index: ' + data.current.uvi
       currentContainer.append(uv)
     });

@@ -5,6 +5,7 @@ var API_KEY = '5da404477baa8d243c35d8549ebcfaae'
 var searchBtn = document.getElementById('btn')
 var currentContainer = document.getElementById('current')
 var fiveDayContainer = document.getElementById('forecast')
+var cardContainer = document.getElementById('card-container')
 var historyContainer = document.getElementById('history')
 
 // on user click, getCity function is called
@@ -69,8 +70,12 @@ function currentForecast(city) {
       
       // variables fetching and displaying the name, temperature, wind speed and humidity of current searched city
       var currentCity = document.createElement('h2')
-      currentCity.textContent = data.name
+      currentCity.textContent = data.name + ' ' + moment().format('L')
       currentContainer.prepend(currentCity)
+
+      var icon = document.createElement('img')
+      icon.setAttribute('src', 'https://openweathermap.org/img/w/' + data.weather[0].icon + '.png')
+      currentContainer.append(icon)
 
       var temp = document.createElement('p')
       temp.textContent = 'Temp: ' + data.main.temp + '˚F'
@@ -96,38 +101,43 @@ function getFiveDay(lat, lon) {
     .then(function (data) {
       console.log('5 day', data);
 
-      var fiveDayHead = document.createElement('h2')
+      var fiveDayHead = document.createElement('h3')
       fiveDayHead.textContent = "5-Day Forecast:"
       fiveDayContainer.prepend(fiveDayHead)
+
+      var cardContainerEl = document.createElement('div')
+      cardContainerEl.setAttribute("id", "card-container")
+      fiveDayContainer.append(cardContainerEl)
 
       // for loop that creates card elements for the five day forecast, displaying each day, date, img based on that day's forecast, temp, wind speed and humidity
       for (var i = 0; i < 5; i++) {
         var card = document.createElement('div')
-        fiveDayContainer.append(card)
+        card.setAttribute("id", "card")
+        cardContainerEl.append(card)
 
         var day = document.createElement('h3')
         day.textContent = moment().add(i + 1, 'days').format('dddd')
-        card.append(day)
+        card.appendChild(day)
 
         var date = document.createElement('h3')
         date.textContent = moment().add(i + 1, 'days').format('L')
-        card.append(date)
+        card.appendChild(date)
 
         var icon = document.createElement('img')
         icon.setAttribute('src', 'https://openweathermap.org/img/w/' + data.daily[i].weather[0].icon + '.png')
-        card.append(icon)
+        card.appendChild(icon)
 
         var fiveDayTemp = document.createElement('p')
         fiveDayTemp.textContent = 'Temp: ' + data.daily[i].temp.day + '˚F'
-        card.append(fiveDayTemp)
+        card.appendChild(fiveDayTemp)
 
         var fiveDayWind = document.createElement('p')
         fiveDayWind.textContent = 'Wind: ' + data.daily[i].wind_speed + ' MPH'
-        card.append(fiveDayWind)
+        card.appendChild(fiveDayWind)
 
         var fiveDayHumid = document.createElement('p')
         fiveDayHumid.textContent = 'Humidity: ' + data.daily[i].humidity + ' %'
-        card.append(fiveDayHumid)
+        card.appendChild(fiveDayHumid)
       };
     });
 };
@@ -139,9 +149,30 @@ function getUVI(lat, lon) {
       return response.json()
     })
     .then(function (data) {
-      var uv = document.createElement('p')
-      uv.setAttribute('id', 'uvIndex')
-      uv.textContent = 'UV Index: ' + data.current.uvi
-      currentContainer.append(uv)
+      var uvEl = document.createElement('p')
+      uvEl.setAttribute('id', 'uvIndex')
+      uvEl.textContent = 'UV Index: ' + data.current.uvi
+      currentContainer.append(uvEl)
     });
 };
+
+// var uv = document.getElementById('uvIndex');
+// var currentUV = data.current.uvi
+
+// function setColors() {
+//   uv.each(function() {
+//     if (currentUV > 7) {
+//       $(this).removeClass('low')
+//       $(this).addClass('moderate')
+//     }
+//     if (currentUV >= 2 && currentUV <= 7) {
+//       $(this).removeClass('moderate')
+//       $(this).addClass('high')
+//     }
+//     if (currentUV <= 2) {
+//       $(this).removeClass('moderate')
+//       $(this).removeClass('high')
+//       $(this).addClass('veryHigh')
+//     }
+//   })
+// };
